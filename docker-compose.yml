@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: php-fpm-limesurvey
+    container_name: limesurvey-app
+    working_dir: /var/www/
+    restart: "always"
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./:/var/www
+    networks:
+      - limesurvey
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 8080:80
+    restart: "unless-stopped"
+    volumes:
+      - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www
+    networks:
+      - limesurvey
+
+networks:
+  limesurvey:
+    driver: bridge
