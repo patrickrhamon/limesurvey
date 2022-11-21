@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libldap2-dev \
     libc-client-dev libkrb5-dev \
     libxslt-dev libxml2-dev \
+    libpq-dev \
     zip \
     unzip
 
@@ -21,7 +22,8 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl soap bcmath iconv xsl zip
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+RUN docker-php-ext-install pdo pdo_mysql pgsql pdo_pgsql mbstring exif pcntl soap bcmath iconv xsl zip
 RUN docker-php-ext-enable pdo_mysql
 RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu
 RUN docker-php-ext-install ldap
@@ -37,10 +39,12 @@ COPY .docker/php/conf.d/php.ini /usr/local/etc/php/conf.d/php.ini
 
 RUN useradd -G www-data,root -u 1000 -d /home/ limesurvey
 RUN mkdir -p /home/limesurvey/.composer && \
+    mkdir -p /var/lib/php/sessions && \
     chown -R limesurvey:limesurvey /home/limesurvey  && \
     chown -R limesurvey:limesurvey /var/www && \
+    chown -R limesurvey:limesurvey /var/lib/php/sessions && \
+    chmod -R 777 /var/lib/php/sessions && \
     chmod -R 755 /var/www/tmp && \
-    chmod -R 777 /var/www/sessions && \
     chmod -R 755 /var/www/upload && \
     chmod -R 755 /var/www/application/config
 

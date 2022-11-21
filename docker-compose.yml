@@ -17,6 +17,7 @@ services:
       - limesurvey
 
   nginx:
+    container_name: limesurvey-nginx
     image: nginx:alpine
     ports:
       - 8080:80
@@ -26,6 +27,21 @@ services:
       - ./:/var/www
     networks:
       - limesurvey
+
+  postgres:
+    container_name: limesurvey-postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+      PGDATA: /data/postgres
+    volumes:
+      - .docker/postgres:/data/postgres
+    ports:
+      - "5435:5432"
+    networks:
+      - limesurvey
+    restart: unless-stopped
 
 networks:
   limesurvey:
